@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="author" content="Ksufer">
+    
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>利用XSStrike Fuzzing XSS漏洞 - KsuferTech</title>
+    <link href="../../../../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../../../../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../../../../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../../../../js/jquery-3.2.1.min.js"></script>
+    <script src="../../../../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../../../../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '../../../..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "\u5229\u7528XSStrike Fuzzing XSS\u6f0f\u6d1e", url: "#_top", children: [
+          ]},
+          {title: "\u524d\u8a00", url: "#_1", children: [
+          ]},
+          {title: "\u7b80\u4ecb", url: "#_2", children: [
+          ]},
+          {title: "\u7279\u70b9", url: "#_3", children: [
+          ]},
+          {title: "\u5b89\u88c5", url: "#_4", children: [
+          ]},
+          {title: "\u7528\u6cd5", url: "#_5", children: [
+          ]},
+          {title: "\u5b9e\u4f8b", url: "#_6", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../../../../js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="黑客/CTF/密码学/blank/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="黑客/CTF/密码学/blank/" class="btn btn-xs btn-link">
+        密码学
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="极客/blank/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="极客/blank/" class="btn btn-xs btn-link">
+        极客
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="xsstrike-fuzzing-xss">利用XSStrike Fuzzing XSS漏洞</h2>
+<p><a href="https://www.freebuf.com/author/%E7%9C%8B%E4%B8%8D%E5%B0%BD%E7%9A%84%E5%B0%98%E5%9F%83" title="由 看不尽的尘埃 发布">看不尽的尘埃</a> 2018-12-24 共 <strong>66723</strong> 人围观 ，发现 <strong>6</strong> 个不明物体
+<a href="https://www.freebuf.com/./articles/web">WEB安全</a></p>
+<h2 id="_1">前言</h2>
+<p><strong>关于XSStrike这款工具虽有前人写过相关资料，但是已经历经一年之久了，这款工具已经发生重大的改变（如从仅支持python2.7 改变为python
+3.6），因此还是有必要再次写一下的。</strong></p>
+<p><img alt="1.png" src="https://image.3001.net/images/20181202/1543715804_5c033bdcac9be.png!small" /></p>
+<h2 id="_2">简介</h2>
+<p>XSStrike是一款检测Cross Site
+Scripting的高级检测工具。它集成了payload生成器、爬虫和模糊引擎功能。XSStrike不是像其他工具那样注入有效负载并检查其工作，而是通过多个解析器分析响应，然后通过与模糊引擎集成的上下文分析来保证有效负载。除此之外，XSStrike还具有爬行，模糊测试，参数发现，WAF检测功能。它还会扫描DOM
+XSS漏洞。</p>
+<blockquote>
+<p>项目地址：<a href="https://github.com/s0md3v/XSStrike">https://github.com/s0md3v/XSStrike</a></p>
+</blockquote>
+<h2 id="_3">特点</h2>
+<blockquote>
+<p>反射和DOM XSS扫描</p>
+<p>多线程抓取</p>
+<p>背景分析</p>
+<p>可配置的核心</p>
+<p>WAF检测和规避</p>
+<p>浏览器引擎集成为零误报率</p>
+<p>智能负载发生器</p>
+<p>手工制作的HTML和JavaScript解析器</p>
+<p>强大的模糊引擎</p>
+<p>支持Blind XSS</p>
+<p>完善的工作流程</p>
+<p>完整的HTTP支持</p>
+<p>来自文件的Bruteforce有效负载</p>
+<p>有效载荷编码</p>
+<p>python编写</p>
+</blockquote>
+<h2 id="_4">安装</h2>
+<p>由于XSStrike只可以运行在python 3.6 以上版本，因此笔者使用parrot来安装运行这款工具（笔者的旧版Kali 自带的python 3
+版本是3.5的）。</p>
+<p>1、给python3安装pip，使用命令如下：</p>
+<pre><code>sudo apt-get install python3-pip
+</code></pre>
+<p>2、下载XSStrike，命令如下：</p>
+<pre><code>git clone https://github.com/s0md3v/XSStrike.git
+</code></pre>
+<p>3、安装依赖模块，命令如下：</p>
+<pre><code>pip3 install -r requirements.txt
+</code></pre>
+<p>4、运行工具，命令如下：</p>
+<pre><code>python3 xsstrike.py -u "http://target"
+</code></pre>
+<h2 id="_5">用法</h2>
+<pre><code>  -h, --help            //显示帮助信息
+
+  -u, --url             //指定目标URL
+
+  --data                //POST方式提交内容
+
+  -v, --verbose         //详细输出
+
+  -f, --file            //加载自定义paload字典
+
+  -t, --threads         //定义线程数
+
+  -l, --level           //爬行深度
+
+  -t, --encode          //定义payload编码方式
+
+  --json                //将POST数据视为JSON
+
+  --path                //测试URL路径组件
+
+  --seeds               //从文件中测试、抓取URL
+
+  --fuzzer              //测试过滤器和Web应用程序防火墙。
+
+  --update              //更新
+
+  --timeout             //设置超时时间
+
+  --params              //指定参数
+
+  --crawl               //爬行
+
+  --proxy               //使用代理
+
+  --blind               //盲测试
+
+  --skip                //跳过确认提示
+
+  --skip-dom            //跳过DOM扫描
+
+  --headers             //提供HTTP标头
+
+  -d, --delay           //设置延迟
+</code></pre>
+<h2 id="_6">实例</h2>
+<p>为了测试该工具的实用性，笔者写了一个简单的存在XSS漏洞的PHP文件。笔者为它命名为xss.php文件。</p>
+<p>xss.php代码如下图：</p>
+<p><img alt="2.png" src="https://image.3001.net/images/20181202/1543715824_5c033bf0848f6.png!small" /></p>
+<p>保存并上传至笔者自己的服务器上。<br />
+<img alt="3.png" src="https://image.3001.net/images/20181202/1543715824_5c033bf097a82.png!small" /></p>
+<p>下图是通过工具Fuzzing出来的一个payload：</p>
+<p><img alt="4.png" src="https://image.3001.net/images/20181202/1543715852_5c033c0cb877d.png!small" /></p>
+<p>我们利用工具Fuzzing出来的payload进行一下测试，测试结果如下图所示：</p>
+<p><img alt="5.png" src="https://image.3001.net/images/20181202/1543715863_5c033c1704bed.png!small" /></p>
+<p><strong>*本文作者：看不尽的尘埃，转载请注明来自FreeBuf.COM</strong></p>
+
+  <br>
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="黑客/CTF/密码学/blank/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="黑客/CTF/密码学/blank/" class="btn btn-xs btn-link">
+        密码学
+      </a>
+    </div>
+    
+    <div class="wm-article-nav">
+      <a href="极客/blank/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="极客/blank/" class="btn btn-xs btn-link">
+        极客
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="col-md-12 wm-page-content"><p>个人网站，要啥版权</p>
+  <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>
